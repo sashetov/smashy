@@ -49,7 +49,7 @@ def get_cname_record_value(sess, record, zone_id):
         return False
     result = result["ResourceRecordSets"][0]["ResourceRecords"][0]['Value']
     return result
-def delete_cname_record(sess, record, zone_id):
+def delete_cname_record(sess, record, ttl, zone_id):
     """
     creates a CNAME record under zone pointint to hostname
     """
@@ -66,7 +66,7 @@ def delete_cname_record(sess, record, zone_id):
                     'ResourceRecordSet': {
                         'Name'  : record,
                         'Type'  : 'CNAME',
-                        'TTL'   : 123,
+                        'TTL'   : int(ttl),
                         "ResourceRecords":[{"Value" : value}]
                     }
                 }]
@@ -85,17 +85,18 @@ def main():
     progname = sys.argv[0]
     args = sys.argv[1:]
     argc = len(args)
-    if argc < 4:
-        print("Usage:\n{} ROLE_ARN REGION RECORD_VALUE ZONE_ID\n"
+    if argc < 5:
+        print("Usage:\n{} ROLE_ARN REGION RECORD_VALUE TTL ZONE_ID \n"
               .format(progname))
         sys.exit(1)
     else:
         role_arn = args[0]
         region = args[1]
         record_value = args[2]
-        zone_id = args[3]
+        ttl = args[3]
+        zone_id = args[4]
     sess = get_session(role_arn, region)
-    res = delete_cname_record(sess, record_value, zone_id)
+    res = delete_cname_record(sess, record_value, ttl, zone_id)
     dump_pretty(res)
 if __name__ == "__main__":
     main()
