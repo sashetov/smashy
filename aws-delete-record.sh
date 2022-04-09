@@ -8,7 +8,6 @@ RESOURCE_VALUE="$2"
 DNS_NAME="$3"
 RECORD_TYPE="$4"
 TTL="$5"
-
 function ee(){
     echo $*
     time eval $*

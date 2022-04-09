@@ -8,6 +8,8 @@ import json
 import re
 import boto3
 from boto3.session import Session
+
+
 def assume_role(role_arn):
     """ assumes a role and returns that role's creds """
     sts = boto3.client('sts')
@@ -15,15 +17,21 @@ def assume_role(role_arn):
         RoleArn=role_arn, RoleSessionName="assume_role_name")
     creds = role_data['Credentials']
     return creds
+
+
 def convert_for_json(o):
     """ converts datetime and other non json.dumpable objects to string
     """
     if isinstance(o, datetime.datetime):
         return o.__str__()
     return o
+
+
 def dump_pretty(thing):
     """ pretty prints a json string, converting undumpables to str first"""
     print(json.dumps(thing, indent=1, default=convert_for_json))
+
+
 def get_session(role_arn, region):
     """
     gets an aws session to use with boto
@@ -38,6 +46,8 @@ def get_session(role_arn, region):
         aws_secret_access_key=aws_secret_access_key,
         aws_session_token=aws_session_token)
     return session
+
+
 def get_asgs_with_prefix(sess, asg_name_prefix):
     """
     gets the asg names that start with the prefix provided
@@ -55,6 +65,8 @@ def get_asgs_with_prefix(sess, asg_name_prefix):
     asgs = [asg["AutoScalingGroupName"] \
             for asg in asgs if rex.match(asg["AutoScalingGroupName"])]
     return asgs
+
+
 def delete_asgs(sess, asg_names):
     """
     deletes all asgs and associated instances
@@ -72,6 +84,8 @@ def delete_asgs(sess, asg_names):
             return False
     asgs_del_res = ress
     return ress
+
+
 def get_launch_configs_with_prefix(sess, asg_name_prefix):
     """
     get the launch configs with the prefix provided
@@ -89,6 +103,8 @@ def get_launch_configs_with_prefix(sess, asg_name_prefix):
     lcs = [lc["LaunchConfigurationName"] \
            for lc in lcs if rex.match(lc["LaunchConfigurationName"])]
     return lcs
+
+
 def delete_lcs(sess, lcs_names):
     """
     delete launch configs
@@ -105,6 +121,8 @@ def delete_lcs(sess, lcs_names):
             print(error)
             return False
     return ress
+
+
 def get_stacks_with_prefix(sess, stack_prefix):
     """
     gets all cf stacks with stack prefix
@@ -121,6 +139,8 @@ def get_stacks_with_prefix(sess, stack_prefix):
     rex = re.compile(pattern)
     asgs = [asg["StackName"] for asg in asgs if rex.match(asg["StackName"])]
     return asgs
+
+
 def delete_stacks(sess, stack_names):
     """
     deletes all cf stacks with prefix
@@ -139,6 +159,8 @@ def delete_stacks(sess, stack_names):
             return  {"status": res["ResponseMetadata"]["HTTPStatusCode"], \
                      "msg": res}
     return {"status": 200, "msg":ress}
+
+
 def main():
     """ entry point of program """
     progname = sys.argv[0]
@@ -160,5 +182,7 @@ def main():
     lcs = get_launch_configs_with_prefix(sess, asg_name_prefix)
     delete_lcs(sess, lcs)
     dump_pretty(stacks_delete_res)
+
+    
 if __name__ == "__main__":
     main()
