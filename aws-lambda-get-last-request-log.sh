@@ -13,5 +13,4 @@ fi
 UTC_OFFSET=$(python3 -c 'print('$UTC_OFFSET'*60*60)')
 LGN=$(aws lambda get-function --function-name $FUNC --query 'Configuration.LoggingConfig.LogGroup' --output text);
 LSN=$(aws logs describe-log-streams --log-group-name $LGN --descending --limit 1 --order-by LastEventTime --query 'logStreams[0].logStreamName' --output text)
-#aws logs get-log-events --log-group-name $LGN --log-stream-name $LSN --query 'events[*].message' --output text  | awk '/[[:space:]]START/{buf=""; } {buf = buf $0 "\n"} END{print buf}'
-aws logs get-log-events --log-group-name $LGN --log-stream-name $LSN --query 'events[*].{timestamp: timestamp, message: message}' | jq -r '.[] | "\(.timestamp / 1000 + '$UTC_OFFSET'| todate) \(.message)"' | awk '/[[:space:]]START/{buf=""; } {buf = buf $0 "\n"} END{print buf}' | sed '/^$/d'
+aws logs get-log-events --log-group-name $LGN --log-stream-name $LSN --query 'events[*].{timestamp: timestamp, message: message}' | jq -r '.[] | "\(.timestamp / 1000 + '$UTC_OFFSET'| todate) \(.message)"' 
