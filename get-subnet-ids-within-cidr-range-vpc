@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <CIDR_RANGE> [VPC_ID]";
+    exit 1;
+fi
+CIDR_RANGE=$1;
+VPC_ID=$2;
+echo $CIDR_RANGE $VPC_ID;
+aws ec2 describe-subnets --output json | jq '.Subnets[] | select(.CidrBlock)' | jq -r '.CidrBlock' | python3 -c "import sys, ipaddress; print('\n'.join([ip for ip in sys.stdin if ipaddress.ip_network(ip.strip()).subnet_of(ipaddress.ip_network('${CIDR_RANGE}'))]))" | sed '/^$/d' | while read CIDR; do
+    if [[ -z $VPC_ID ]]; then
+        aws ec2 describe-subnets \
+            --filters "Name=cidr-block,Values=$CIDR" \
+            --query 'Subnets[*].SubnetId' --output text;
+    else
+        aws ec2 describe-subnets \
+            --filters "Name=cidr-block,Values=$CIDR" \
+                      "Name=vpc-id,Values=$VPC_ID" \
+            --query 'Subnets[*].SubnetId' --output text;
+    fi
+done
