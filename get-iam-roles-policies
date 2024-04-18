@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 [<role-arn>...]"
+    exit 1
+fi
+. funcs
+#set -x
+ROLE_ARN=$1
+list_role_policies_docs "$ROLE_ARN";
