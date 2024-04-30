@@ -7,7 +7,7 @@ fi
 
 {
     for sg in ${@}; do
-        aws ec2 describe-security-groups --group-ids $sg --query 'SecurityGroups[*].{ID:GroupId,Ingress:IpPermissions}' --output json | jq -r '.[] | .ID as $id | .Ingress[] | .IpRanges[] as $iprange | "\($id),Ingress,\(.FromPort)-\(.ToPort),\($iprange.CidrIp),\($iprange.Description // "N/A")"'
-        aws ec2 describe-security-groups --group-ids $sg --query 'SecurityGroups[*].{ID:GroupId,Egress:IpPermissionsEgress}' --output json | jq -r '.[] | .ID as $id | .Egress[] | .IpRanges[] as $iprange | "\($id),Egress,\(.FromPort)-\(.ToPort),\($iprange.CidrIp),\($iprange.Description // "N/A")"'
+        aws ec2 describe-security-groups --group-ids $sg --query 'SecurityGroups[*].{ID:GroupId,Ingress:IpPermissions}' --output json | jq -r '.[] | .ID as $id | .Ingress[] | .IpRanges[] as $iprange | "\($id),Ingress,\(.IpProtocol),\(.FromPort)-\(.ToPort),\($iprange.CidrIp),\($iprange.Description // "N/A")"'
+        aws ec2 describe-security-groups --group-ids $sg --query 'SecurityGroups[*].{ID:GroupId,Egress:IpPermissionsEgress}' --output json | jq -r '.[] | .ID as $id | .Egress[] | .IpRanges[] as $iprange | "\($id),Egress,\(.IpProtocol),\(.FromPort)-\(.ToPort),\($iprange.CidrIp),\($iprange.Description // "N/A")"'
     done
 } | column -t -s,
